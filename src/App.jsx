@@ -1,7 +1,4 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { useEffect } from 'react'
-import { supabase } from './lib/supabase'
-
 import { CartProvider } from './context/CartContext'
 import { WishlistProvider } from './context/WishlistContext'
 
@@ -21,16 +18,6 @@ import Checkout from './pages/Checkout'
 import RootLayout from './layouts/RootLayout'
 
 function App() {
-
-  useEffect(() => {
-    // Check if user session exists after email confirmation
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) {
-        console.log("User logged in:", data.session.user.email)
-      }
-    })
-  }, [])
-
   return (
     <CartProvider>
       <WishlistProvider>
