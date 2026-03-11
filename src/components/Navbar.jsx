@@ -1,22 +1,41 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Menu, X, ShoppingCart, Heart, Search } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
+import { supabase } from '../lib/supabase'
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
   const { getTotalItems } = useCart()
   const { wishlist } = useWishlist()
   const [searchQuery, setSearchQuery] = useState('')
+  const [user, setUser] = useState(null)
+
+  useEffect(() => {
+    // get current session
+    supabase.auth.getSession().then(({ data }) => {
+      setUser(data.session?.user ?? null)
+    })
+
+    // listen for login/logout
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null)
+      }
+    )
+
+    return () => {
+      listener.subscription.unsubscribe()
+    }
+  }, [])
 
   const menuItems = [
     { name: 'Home', path: '/' },
     { name: 'Men', path: '/men' },
     { name: 'Women', path: '/women' },
-    { name: 'Kids', path: '/kids' },
-    { name: 'Sign In', path: '/login' }
+    { name: 'Kids', path: '/kids' }
   ]
 
   const navVariants = {
@@ -57,13 +76,22 @@ const Navbar = () => {
               </Link>
             ))}
 
-            {/* Sign In beside Kids */}
-            <Link
-              to="/login"
-              className="px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-opacity-90 transition-smooth"
-            >
-              Sign In
-            </Link>
+            {/* Auth Button */}
+            {user ? (
+              <Link
+                to="/account"
+                className="px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-opacity-90 transition-smooth"
+              >
+                My Account
+              </Link>
+            ) : (
+              <Link
+                to="/login"
+                className="px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-opacity-90 transition-smooth"
+              >
+                Sign In
+              </Link>
+            )}
           </div>
 
           {/* Right Side Icons */}
@@ -131,14 +159,24 @@ const Navbar = () => {
               </Link>
             ))}
 
-            {/* Mobile Sign In */}
-            <Link
-              to="/login"
-              onClick={() => setIsOpen(false)}
-              className="block w-full mt-4 px-4 py-2 bg-primary text-white rounded-lg font-medium text-center"
-            >
-              Sign In
-            </Link>
+            {/* Mobile Auth */}
+            {user ? (
+              <Link
+                to="/account"
+                onClick={() => setIsOpen(false)}
+                className="block w-full mt-4 px-4 py-2 bg-primary text-white rounded-lg font-medium text-center"
+              >
+                My Account
+              </Link>
+            ) : (
+              <Link
+                to="/login"
+                onClick={() => setIsOpen(false)}
+                className="block w-full mt-4 px-4 py-2 bg-primary text-white rounded-lg font-medium text-center"
+              >
+                Sign In
+              </Link>
+            )}
 
           </motion.div>
         )}

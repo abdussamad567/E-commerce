@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Eye, EyeOff } from 'lucide-react'
-import { supabase } from '../lib/supabase'   // ✅ ADD THIS
+import { supabase } from '../lib/supabase'
 
 const Login = () => {
 
@@ -22,7 +22,6 @@ const Login = () => {
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
-  // ✅ CONNECT SUPABASE LOGIN
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
@@ -46,7 +45,10 @@ const Login = () => {
       return
     }
 
-    navigate('/')   // go to homepage after login
+    // ensure session refresh
+    await supabase.auth.getSession()
+
+    navigate('/')
   }
 
   const containerVariants = {
